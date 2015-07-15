@@ -1,0 +1,47 @@
+// This file is to be applied to every subproject.
+String mavenGroupId = 'bm.gradar'
+String mavenVersion = '1.0'
+
+apply plugin: 'java'
+apply plugin: 'forge'
+
+minecraft {
+  version="1.7.10-10.13.2.1230"
+  if(file('../run').exists()) {
+    runDir="../run/assets"
+  } else {
+    runDir="assets"
+  }
+}
+
+String mavenArtifactId = name
+
+group = mavenGroupId
+version = mavenVersion
+
+task sourcesJar(type:Jar, dependsOn:classes, description:'Creates a jar from the source files.') {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives jar
+  archives sourcesJar
+}
+
+configure(install.repositories.mavenInstaller) {
+  pom.project {
+    groupId = mavenGroupId
+    artifactId = mavenArtifactId
+    version = mavenVersion
+  }
+}
+
+task createFolders(description:'Creates the source folders if they do not exist.') doLast {
+  sourceSets*.allSource*.srcDirs*.each { File srcDir ->
+    if (!srcDir.isDirectory()) {
+      println "Creating source folder: ${srcDir}"
+      srcDir.mkdirs()
+    }
+  }
+}

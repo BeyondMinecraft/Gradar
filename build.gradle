@@ -1,0 +1,59 @@
+//TODO: Note that in #ForgeGradle in irc, dmod suggested running the following command line:
+//  gradlew clean setupDecompWorkspace build --refresh-dependencies
+import org.gradle.api.artifacts.*
+
+buildscript {
+  repositories {
+    mavenCentral()
+    maven {
+      name = "forge"
+      url = "http://files.minecraftforge.net/maven"
+    }
+    maven {
+      name = "sonatype"
+      url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+  }
+  dependencies {
+    classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+  }
+}
+
+repositories {
+  ivy {
+    url "http://BeyondMinecraft.github.io/repository/abacus"
+  }
+}
+
+apply plugin:'base' // To add "clean" task to the root project.
+apply plugin:'java'
+apply plugin:'forge'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+minecraft {
+  version="1.7.10-10.13.2.1230"
+  if(file('../run').exists()) {
+    runDir="../run/assets"
+  } else {
+    runDir="assets"
+  }
+}
+
+subprojects {
+  apply from: rootProject.file('common.gradle')
+}
+
+task wrapper(type:Wrapper, description:'Creates and deploys the Gradle wrapper to the current directory.') {
+  gradleVersion = '2.2.1'
+}
+
+uploadArchives {
+  repositories {
+    ivy {
+      url "../BeyondMinecraft.github.io/repository/gradar"
+    }
+  }
+}
